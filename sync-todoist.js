@@ -29,32 +29,37 @@ const closeTodoInDB = async (id) => {
 }
 
 const syncTodoist = async () => {
-  const todosFromTodoist = await getTodosFromTodoist()
-  const todosFromAPI = await getTodosFromAPI()
-  if (todosFromAPI.length == todosFromTodoist.length) {
-    return
-  }
-  const todosNotPresentInDB = _.differenceWith(
-    todosFromTodoist,
-    todosFromAPI,
-    ({ id }, { todoId }) => _.eq(id, todoId),
-  )
-  const todosNotclosed = _.differenceWith(todosFromAPI, todosFromTodoist, ({ todoId }, { id }) =>
-    _.eq(id, todoId),
-  )
-  todosNotPresentInDB.forEach((todo) => {
-    const todoRequest = {
-      content: todo.content,
-      projectId: todo.project_id,
-      todoId: todo.id,
-      completed: false,
-      date: todo.created,
+  try {
+    const todosFromTodoist = await getTodosFromTodoist()
+    const todosFromAPI = await getTodosFromAPI()
+    if (todosFromAPI.length == todosFromTodoist.length) {
+      return
     }
-    createTodoInDB(todoRequest)
-  })
-  todosNotclosed.forEach((todo) => {
-    closeTodoInDB(todo.todoId)
-  })
+    const todosNotPresentInDB = _.differenceWith(
+      todosFromTodoist,
+      todosFromAPI,
+      ({ id }, { todoId }) => _.eq(id, todoId),
+    )
+    const todosNotclosed = _.differenceWith(todosFromAPI, todosFromTodoist, ({ todoId }, { id }) =>
+      _.eq(id, todoId),
+    )
+    todosNotPresentInDB.forEach((todo) => {
+      const todoRequest = {
+        content: todo.content,
+        projectId: todo.project_id,
+        todoId: todo.id,
+        completed: false,
+        date: todo.created,
+      }
+      createTodoInDB(todoRequest)
+    })
+    todosNotclosed.forEach((todo) => {
+      closeTodoInDB(todo.todoId)
+    })
+    console.log('All done!')
+  } catch {
+    console.log('Failed to sync!')
+  }
 }
 
 syncTodoist()
