@@ -32,9 +32,6 @@ const syncTodoist = async () => {
   try {
     const todosFromTodoist = await getTodosFromTodoist()
     const todosFromAPI = await getTodosFromAPI()
-    if (todosFromAPI.length == todosFromTodoist.length) {
-      return
-    }
     const todosNotPresentInDB = _.differenceWith(
       todosFromTodoist,
       todosFromAPI,
